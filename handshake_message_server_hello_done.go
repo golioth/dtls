@@ -1,10 +1,12 @@
 package dtls
 
+import handshakePkg "github.com/pion/dtls/v2/pkg/protocol/handshake"
+
 type handshakeMessageServerHelloDone struct {
 }
 
-func (h handshakeMessageServerHelloDone) handshakeType() handshakeType {
-	return handshakeTypeServerHelloDone
+func (h handshakeMessageServerHelloDone) Type() handshakePkg.Type {
+	return handshakePkg.TypeServerHelloDone
 }
 
 func (h *handshakeMessageServerHelloDone) Marshal() ([]byte, error) {

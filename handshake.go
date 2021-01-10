@@ -1,21 +1,11 @@
 package dtls
 
-// https://tools.ietf.org/html/rfc5246#section-7.4
-type handshakeType uint8
+import (
+	"github.com/pion/dtls/v2/internal/util"
+	handshakePkg "github.com/pion/dtls/v2/pkg/protocol/handshake"
+)
 
 const (
-	handshakeTypeHelloRequest       handshakeType = 0
-	handshakeTypeClientHello        handshakeType = 1
-	handshakeTypeServerHello        handshakeType = 2
-	handshakeTypeHelloVerifyRequest handshakeType = 3
-	handshakeTypeCertificate        handshakeType = 11
-	handshakeTypeServerKeyExchange  handshakeType = 12
-	handshakeTypeCertificateRequest handshakeType = 13
-	handshakeTypeServerHelloDone    handshakeType = 14
-	handshakeTypeCertificateVerify  handshakeType = 15
-	handshakeTypeClientKeyExchange  handshakeType = 16
-	handshakeTypeFinished           handshakeType = 20
-
 	// msg_len for Handshake messages assumes an extra 12 bytes for
 	// sequence, fragment and version information
 	handshakeMessageHeaderLength = 12
@@ -25,35 +15,7 @@ type handshakeMessage interface {
 	Marshal() ([]byte, error)
 	Unmarshal(data []byte) error
 
-	handshakeType() handshakeType
-}
-
-func (h handshakeType) String() string {
-	switch h {
-	case handshakeTypeHelloRequest:
-		return "HelloRequest"
-	case handshakeTypeClientHello:
-		return "ClientHello"
-	case handshakeTypeServerHello:
-		return "ServerHello"
-	case handshakeTypeHelloVerifyRequest:
-		return "HelloVerifyRequest"
-	case handshakeTypeCertificate:
-		return "TypeCertificate"
-	case handshakeTypeServerKeyExchange:
-		return "ServerKeyExchange"
-	case handshakeTypeCertificateRequest:
-		return "CertificateRequest"
-	case handshakeTypeServerHelloDone:
-		return "ServerHelloDone"
-	case handshakeTypeCertificateVerify:
-		return "CertificateVerify"
-	case handshakeTypeClientKeyExchange:
-		return "ClientKeyExchange"
-	case handshakeTypeFinished:
-		return "Finished"
-	}
-	return ""
+	Type() handshakePkg.Type
 }
 
 // The handshake protocol is responsible for selecting a cipher spec and
@@ -85,7 +47,7 @@ func (h *handshake) Marshal() ([]byte, error) {
 
 	h.handshakeHeader.length = uint32(len(msg))
 	h.handshakeHeader.fragmentLength = h.handshakeHeader.length
-	h.handshakeHeader.handshakeType = h.handshakeMessage.handshakeType()
+	h.handshakeHeader.handshakeType = h.handshakeMessage.Type()
 	header, err := h.handshakeHeader.Marshal()
 	if err != nil {
 		return nil, err
@@ -99,35 +61,35 @@ func (h *handshake) Unmarshal(data []byte) error {
 		return err
 	}
 
-	reportedLen := bigEndianUint24(data[1:])
+	reportedLen := util.BigEndianUint24(data[1:])
 	if uint32(len(data)-handshakeMessageHeaderLength) != reportedLen {
 		return errLengthMismatch
 	} else if reportedLen != h.handshakeHeader.fragmentLength {
 		return errLengthMismatch
 	}
 
-	switch handshakeType(data[0]) {
-	case handshakeTypeHelloRequest:
+	switch handshakePkg.Type(data[0]) {
+	case handshakePkg.TypeHelloRequest:
 		return errNotImplemented
-	case handshakeTypeClientHello:
+	case handshakePkg.TypeClientHello:
 		h.handshakeMessage = &handshakeMessageClientHello{}
-	case handshakeTypeHelloVerifyRequest:
+	case handshakePkg.TypeHelloVerifyRequest:
 		h.handshakeMessage = &handshakeMessageHelloVerifyRequest{}
-	case handshakeTypeServerHello:
+	case handshakePkg.TypeServerHello:
 		h.handshakeMessage = &handshakeMessageServerHello{}
-	case handshakeTypeCertificate:
-		h.handshakeMessage = &handshakeMessageCertificate{}
-	case handshakeTypeServerKeyExchange:
+	case handshakePkg.TypeCertificate:
+		h.handshakeMessage = &handshakePkg.MessageCertificate{}
+	case handshakePkg.TypeServerKeyExchange:
 		h.handshakeMessage = &handshakeMessageServerKeyExchange{}
-	case handshakeTypeCertificateRequest:
+	case handshakePkg.TypeCertificateRequest:
 		h.handshakeMessage = &handshakeMessageCertificateRequest{}
-	case handshakeTypeServerHelloDone:
+	case handshakePkg.TypeServerHelloDone:
 		h.handshakeMessage = &handshakeMessageServerHelloDone{}
-	case handshakeTypeClientKeyExchange:
+	case handshakePkg.TypeClientKeyExchange:
 		h.handshakeMessage = &handshakeMessageClientKeyExchange{}
-	case handshakeTypeFinished:
+	case handshakePkg.TypeFinished:
 		h.handshakeMessage = &handshakeMessageFinished{}
-	case handshakeTypeCertificateVerify:
+	case handshakePkg.TypeCertificateVerify:
 		h.handshakeMessage = &handshakeMessageCertificateVerify{}
 	default:
 		return errNotImplemented

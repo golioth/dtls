@@ -2,6 +2,8 @@ package dtls
 
 import (
 	"context"
+
+	handshakePkg "github.com/pion/dtls/v2/pkg/protocol/handshake"
 )
 
 func flight3Parse(ctx context.Context, c flightConn, state *State, cache *handshakeCache, cfg *handshakeConfig) (flightVal, *alert, error) { //nolint:gocognit
@@ -9,10 +11,10 @@ func flight3Parse(ctx context.Context, c flightConn, state *State, cache *handsh
 	// Clients SHOULD handle this by sending a new ClientHello with a cookie in response
 	// to the new HelloVerifyRequest. RFC 6347 Section 4.2.1
 	seq, msgs, ok := cache.fullPullMap(state.handshakeRecvSequence,
-		handshakeCachePullRule{handshakeTypeHelloVerifyRequest, cfg.initialEpoch, false, true},
+		handshakeCachePullRule{handshakePkg.TypeHelloVerifyRequest, cfg.initialEpoch, false, true},
 	)
 	if ok {
-		if h, msgOk := msgs[handshakeTypeHelloVerifyRequest].(*handshakeMessageHelloVerifyRequest); msgOk {
+		if h, msgOk := msgs[handshakePkg.TypeHelloVerifyRequest].(*handshakeMessageHelloVerifyRequest); msgOk {
 			// DTLS 1.2 clients must not assume that the server will use the protocol version
 			// specified in HelloVerifyRequest message. RFC 6347 Section 4.2.1
 			if !h.version.Equal(protocolVersion1_0) && !h.version.Equal(protocolVersion1_2) {
@@ -26,17 +28,17 @@ func flight3Parse(ctx context.Context, c flightConn, state *State, cache *handsh
 
 	if cfg.localPSKCallback != nil {
 		seq, msgs, ok = cache.fullPullMap(state.handshakeRecvSequence,
-			handshakeCachePullRule{handshakeTypeServerHello, cfg.initialEpoch, false, false},
-			handshakeCachePullRule{handshakeTypeServerKeyExchange, cfg.initialEpoch, false, true},
-			handshakeCachePullRule{handshakeTypeServerHelloDone, cfg.initialEpoch, false, false},
+			handshakeCachePullRule{handshakePkg.TypeServerHello, cfg.initialEpoch, false, false},
+			handshakeCachePullRule{handshakePkg.TypeServerKeyExchange, cfg.initialEpoch, false, true},
+			handshakeCachePullRule{handshakePkg.TypeServerHelloDone, cfg.initialEpoch, false, false},
 		)
 	} else {
 		seq, msgs, ok = cache.fullPullMap(state.handshakeRecvSequence,
-			handshakeCachePullRule{handshakeTypeServerHello, cfg.initialEpoch, false, false},
-			handshakeCachePullRule{handshakeTypeCertificate, cfg.initialEpoch, false, false},
-			handshakeCachePullRule{handshakeTypeServerKeyExchange, cfg.initialEpoch, false, false},
-			handshakeCachePullRule{handshakeTypeCertificateRequest, cfg.initialEpoch, false, true},
-			handshakeCachePullRule{handshakeTypeServerHelloDone, cfg.initialEpoch, false, false},
+			handshakeCachePullRule{handshakePkg.TypeServerHello, cfg.initialEpoch, false, false},
+			handshakeCachePullRule{handshakePkg.TypeCertificate, cfg.initialEpoch, false, false},
+			handshakeCachePullRule{handshakePkg.TypeServerKeyExchange, cfg.initialEpoch, false, false},
+			handshakeCachePullRule{handshakePkg.TypeCertificateRequest, cfg.initialEpoch, false, true},
+			handshakeCachePullRule{handshakePkg.TypeServerHelloDone, cfg.initialEpoch, false, false},
 		)
 	}
 	if !ok {
@@ -45,7 +47,7 @@ func flight3Parse(ctx context.Context, c flightConn, state *State, cache *handsh
 	}
 	state.handshakeRecvSequence = seq
 
-	if h, ok := msgs[handshakeTypeServerHello].(*handshakeMessageServerHello); ok {
+	if h, ok := msgs[handshakePkg.TypeServerHello].(*handshakeMessageServerHello); ok {
 		if !h.version.Equal(protocolVersion1_2) {
 			return 0, &alert{alertLevelFatal, alertProtocolVersion}, errUnsupportedProtocolVersion
 		}
@@ -78,18 +80,18 @@ func flight3Parse(ctx context.Context, c flightConn, state *State, cache *handsh
 		cfg.log.Tracef("[handshake] use cipher suite: %s", h.cipherSuite.String())
 	}
 
-	if h, ok := msgs[handshakeTypeCertificate].(*handshakeMessageCertificate); ok {
-		state.PeerCertificates = h.certificate
+	if h, ok := msgs[handshakePkg.TypeCertificate].(*handshakePkg.MessageCertificate); ok {
+		state.PeerCertificates = h.Certificate
 	}
 
-	if h, ok := msgs[handshakeTypeServerKeyExchange].(*handshakeMessageServerKeyExchange); ok {
+	if h, ok := msgs[handshakePkg.TypeServerKeyExchange].(*handshakeMessageServerKeyExchange); ok {
 		alertPtr, err := handleServerKeyExchange(c, state, cfg, h)
 		if err != nil {
 			return 0, alertPtr, err
 		}
 	}
 
-	if _, ok := msgs[handshakeTypeCertificateRequest].(*handshakeMessageCertificateRequest); ok {
+	if _, ok := msgs[handshakePkg.TypeCertificateRequest].(*handshakeMessageCertificateRequest); ok {
 		state.remoteRequestedCertificate = true
 	}
 

@@ -1,11 +1,13 @@
 package dtls
 
+import handshakePkg "github.com/pion/dtls/v2/pkg/protocol/handshake"
+
 type handshakeMessageFinished struct {
 	verifyData []byte
 }
 
-func (h handshakeMessageFinished) handshakeType() handshakeType {
-	return handshakeTypeFinished
+func (h handshakeMessageFinished) Type() handshakePkg.Type {
+	return handshakePkg.TypeFinished
 }
 
 func (h *handshakeMessageFinished) Marshal() ([]byte, error) {

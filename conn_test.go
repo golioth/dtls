@@ -17,6 +17,7 @@ import (
 
 	"github.com/pion/dtls/v2/internal/net/dpipe"
 	"github.com/pion/dtls/v2/pkg/crypto/selfsign"
+	handshakePkg "github.com/pion/dtls/v2/pkg/protocol/handshake"
 	"github.com/pion/transport/test"
 )
 
@@ -1704,7 +1705,7 @@ func TestProtocolVersionValidation(t *testing.T) {
 							handshakeHeader: handshakeHeader{
 								messageSequence: 2,
 							},
-							handshakeMessage: &handshakeMessageCertificate{},
+							handshakeMessage: &handshakePkg.MessageCertificate{},
 						},
 					},
 					{

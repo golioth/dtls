@@ -2,6 +2,8 @@ package dtls
 
 import (
 	"encoding/binary"
+
+	handshakePkg "github.com/pion/dtls/v2/pkg/protocol/handshake"
 )
 
 type handshakeMessageClientKeyExchange struct {
@@ -9,8 +11,8 @@ type handshakeMessageClientKeyExchange struct {
 	publicKey    []byte
 }
 
-func (h handshakeMessageClientKeyExchange) handshakeType() handshakeType {
-	return handshakeTypeClientKeyExchange
+func (h handshakeMessageClientKeyExchange) Type() handshakePkg.Type {
+	return handshakePkg.TypeClientKeyExchange
 }
 
 func (h *handshakeMessageClientKeyExchange) Marshal() ([]byte, error) {

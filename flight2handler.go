@@ -3,11 +3,13 @@ package dtls
 import (
 	"bytes"
 	"context"
+
+	handshakePkg "github.com/pion/dtls/v2/pkg/protocol/handshake"
 )
 
 func flight2Parse(ctx context.Context, c flightConn, state *State, cache *handshakeCache, cfg *handshakeConfig) (flightVal, *alert, error) {
 	seq, msgs, ok := cache.fullPullMap(state.handshakeRecvSequence,
-		handshakeCachePullRule{handshakeTypeClientHello, cfg.initialEpoch, true, false},
+		handshakeCachePullRule{handshakePkg.TypeClientHello, cfg.initialEpoch, true, false},
 	)
 	if !ok {
 		// Client may retransmit the first ClientHello when HelloVerifyRequest is dropped.
@@ -19,7 +21,7 @@ func flight2Parse(ctx context.Context, c flightConn, state *State, cache *handsh
 	var clientHello *handshakeMessageClientHello
 
 	// Validate type
-	if clientHello, ok = msgs[handshakeTypeClientHello].(*handshakeMessageClientHello); !ok {
+	if clientHello, ok = msgs[handshakePkg.TypeClientHello].(*handshakeMessageClientHello); !ok {
 		return 0, &alert{alertLevelFatal, alertInternalError}, nil
 	}
 

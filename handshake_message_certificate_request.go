@@ -2,6 +2,8 @@ package dtls
 
 import (
 	"encoding/binary"
+
+	handshakePkg "github.com/pion/dtls/v2/pkg/protocol/handshake"
 )
 
 /*
@@ -21,8 +23,8 @@ const (
 	handshakeMessageCertificateRequestMinLength = 5
 )
 
-func (h handshakeMessageCertificateRequest) handshakeType() handshakeType {
-	return handshakeTypeCertificateRequest
+func (h handshakeMessageCertificateRequest) Type() handshakePkg.Type {
+	return handshakePkg.TypeCertificateRequest
 }
 
 func (h *handshakeMessageCertificateRequest) Marshal() ([]byte, error) {

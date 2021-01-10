@@ -1,6 +1,10 @@
 package dtls
 
-import "encoding/binary"
+import (
+	"encoding/binary"
+
+	"github.com/pion/dtls/v2/internal/util"
+)
 
 type recordLayerHeader struct {
 	contentType     contentType
@@ -49,7 +53,7 @@ func (r *recordLayerHeader) Marshal() ([]byte, error) {
 	out[1] = r.protocolVersion.major
 	out[2] = r.protocolVersion.minor
 	binary.BigEndian.PutUint16(out[3:], r.epoch)
-	putBigEndianUint48(out[5:], r.sequenceNumber)
+	util.PutBigEndianUint48(out[5:], r.sequenceNumber)
 	binary.BigEndian.PutUint16(out[recordLayerHeaderSize-2:], r.contentLen)
 	return out, nil
 }

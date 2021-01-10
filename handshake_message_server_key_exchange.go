@@ -2,6 +2,8 @@ package dtls
 
 import (
 	"encoding/binary"
+
+	handshakePkg "github.com/pion/dtls/v2/pkg/protocol/handshake"
 )
 
 // Structure supports ECDH and PSK
@@ -16,8 +18,8 @@ type handshakeMessageServerKeyExchange struct {
 	signature          []byte
 }
 
-func (h handshakeMessageServerKeyExchange) handshakeType() handshakeType {
-	return handshakeTypeServerKeyExchange
+func (h handshakeMessageServerKeyExchange) Type() handshakePkg.Type {
+	return handshakePkg.TypeServerKeyExchange
 }
 
 func (h *handshakeMessageServerKeyExchange) Marshal() ([]byte, error) {

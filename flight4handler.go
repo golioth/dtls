@@ -3,13 +3,15 @@ package dtls
 import (
 	"context"
 	"crypto/x509"
+
+	handshakePkg "github.com/pion/dtls/v2/pkg/protocol/handshake"
 )
 
 func flight4Parse(ctx context.Context, c flightConn, state *State, cache *handshakeCache, cfg *handshakeConfig) (flightVal, *alert, error) { //nolint:gocognit
 	seq, msgs, ok := cache.fullPullMap(state.handshakeRecvSequence,
-		handshakeCachePullRule{handshakeTypeCertificate, cfg.initialEpoch, true, true},
-		handshakeCachePullRule{handshakeTypeClientKeyExchange, cfg.initialEpoch, true, false},
-		handshakeCachePullRule{handshakeTypeCertificateVerify, cfg.initialEpoch, true, true},
+		handshakeCachePullRule{handshakePkg.TypeCertificate, cfg.initialEpoch, true, true},
+		handshakeCachePullRule{handshakePkg.TypeClientKeyExchange, cfg.initialEpoch, true, false},
+		handshakeCachePullRule{handshakePkg.TypeCertificateVerify, cfg.initialEpoch, true, true},
 	)
 	if !ok {
 		// No valid message received. Keep reading
@@ -18,28 +20,28 @@ func flight4Parse(ctx context.Context, c flightConn, state *State, cache *handsh
 
 	// Validate type
 	var clientKeyExchange *handshakeMessageClientKeyExchange
-	if clientKeyExchange, ok = msgs[handshakeTypeClientKeyExchange].(*handshakeMessageClientKeyExchange); !ok {
+	if clientKeyExchange, ok = msgs[handshakePkg.TypeClientKeyExchange].(*handshakeMessageClientKeyExchange); !ok {
 		return 0, &alert{alertLevelFatal, alertInternalError}, nil
 	}
 
-	if h, hasCert := msgs[handshakeTypeCertificate].(*handshakeMessageCertificate); hasCert {
-		state.PeerCertificates = h.certificate
+	if h, hasCert := msgs[handshakePkg.TypeCertificate].(*handshakePkg.MessageCertificate); hasCert {
+		state.PeerCertificates = h.Certificate
 	}
 
-	if h, hasCertVerify := msgs[handshakeTypeCertificateVerify].(*handshakeMessageCertificateVerify); hasCertVerify {
+	if h, hasCertVerify := msgs[handshakePkg.TypeCertificateVerify].(*handshakeMessageCertificateVerify); hasCertVerify {
 		if state.PeerCertificates == nil {
 			return 0, &alert{alertLevelFatal, alertNoCertificate}, errCertificateVerifyNoCertificate
 		}
 
 		plainText := cache.pullAndMerge(
-			handshakeCachePullRule{handshakeTypeClientHello, cfg.initialEpoch, true, false},
-			handshakeCachePullRule{handshakeTypeServerHello, cfg.initialEpoch, false, false},
-			handshakeCachePullRule{handshakeTypeCertificate, cfg.initialEpoch, false, false},
-			handshakeCachePullRule{handshakeTypeServerKeyExchange, cfg.initialEpoch, false, false},
-			handshakeCachePullRule{handshakeTypeCertificateRequest, cfg.initialEpoch, false, false},
-			handshakeCachePullRule{handshakeTypeServerHelloDone, cfg.initialEpoch, false, false},
-			handshakeCachePullRule{handshakeTypeCertificate, cfg.initialEpoch, true, false},
-			handshakeCachePullRule{handshakeTypeClientKeyExchange, cfg.initialEpoch, true, false},
+			handshakeCachePullRule{handshakePkg.TypeClientHello, cfg.initialEpoch, true, false},
+			handshakeCachePullRule{handshakePkg.TypeServerHello, cfg.initialEpoch, false, false},
+			handshakeCachePullRule{handshakePkg.TypeCertificate, cfg.initialEpoch, false, false},
+			handshakeCachePullRule{handshakePkg.TypeServerKeyExchange, cfg.initialEpoch, false, false},
+			handshakeCachePullRule{handshakePkg.TypeCertificateRequest, cfg.initialEpoch, false, false},
+			handshakeCachePullRule{handshakePkg.TypeServerHelloDone, cfg.initialEpoch, false, false},
+			handshakeCachePullRule{handshakePkg.TypeCertificate, cfg.initialEpoch, true, false},
+			handshakeCachePullRule{handshakePkg.TypeClientKeyExchange, cfg.initialEpoch, true, false},
 		)
 
 		// Verify that the pair of hash algorithm and signiture is listed.
@@ -123,7 +125,7 @@ func flight4Parse(ctx context.Context, c flightConn, state *State, cache *handsh
 	}
 
 	seq, msgs, ok = cache.fullPullMap(seq,
-		handshakeCachePullRule{handshakeTypeFinished, cfg.initialEpoch + 1, true, false},
+		handshakeCachePullRule{handshakePkg.TypeFinished, cfg.initialEpoch + 1, true, false},
 	)
 	if !ok {
 		// No valid message received. Keep reading
@@ -131,7 +133,7 @@ func flight4Parse(ctx context.Context, c flightConn, state *State, cache *handsh
 	}
 	state.handshakeRecvSequence = seq
 
-	if _, ok = msgs[handshakeTypeFinished].(*handshakeMessageFinished); !ok {
+	if _, ok = msgs[handshakePkg.TypeFinished].(*handshakeMessageFinished); !ok {
 		return 0, &alert{alertLevelFatal, alertInternalError}, nil
 	}
 
@@ -213,8 +215,8 @@ func flight4Generate(c flightConn, state *State, cache *handshakeCache, cfg *han
 					protocolVersion: protocolVersion1_2,
 				},
 				content: &handshake{
-					handshakeMessage: &handshakeMessageCertificate{
-						certificate: certificate.Certificate,
+					handshakeMessage: &handshakePkg.MessageCertificate{
+						Certificate: certificate.Certificate,
 					},
 				},
 			},

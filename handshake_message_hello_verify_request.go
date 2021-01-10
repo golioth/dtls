@@ -1,5 +1,7 @@
 package dtls
 
+import handshakePkg "github.com/pion/dtls/v2/pkg/protocol/handshake"
+
 /*
    The definition of HelloVerifyRequest is as follows:
 
@@ -22,8 +24,8 @@ type handshakeMessageHelloVerifyRequest struct {
 	cookie  []byte
 }
 
-func (h handshakeMessageHelloVerifyRequest) handshakeType() handshakeType {
-	return handshakeTypeHelloVerifyRequest
+func (h handshakeMessageHelloVerifyRequest) Type() handshakePkg.Type {
+	return handshakePkg.TypeHelloVerifyRequest
 }
 
 func (h *handshakeMessageHelloVerifyRequest) Marshal() ([]byte, error) {

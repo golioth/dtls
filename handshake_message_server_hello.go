@@ -2,6 +2,8 @@ package dtls
 
 import (
 	"encoding/binary"
+
+	handshakePkg "github.com/pion/dtls/v2/pkg/protocol/handshake"
 )
 
 /*
@@ -22,8 +24,8 @@ type handshakeMessageServerHello struct {
 
 const handshakeMessageServerHelloVariableWidthStart = 2 + handshakeRandomLength
 
-func (h handshakeMessageServerHello) handshakeType() handshakeType {
-	return handshakeTypeServerHello
+func (h handshakeMessageServerHello) Type() handshakePkg.Type {
+	return handshakePkg.TypeServerHello
 }
 
 func (h *handshakeMessageServerHello) Marshal() ([]byte, error) {

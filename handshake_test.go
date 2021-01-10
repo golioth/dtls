@@ -4,6 +4,8 @@ import (
 	"reflect"
 	"testing"
 	"time"
+
+	handshakePkg "github.com/pion/dtls/v2/pkg/protocol/handshake"
 )
 
 func TestHandshakeMessage(t *testing.T) {
@@ -17,7 +19,7 @@ func TestHandshakeMessage(t *testing.T) {
 		handshakeHeader: handshakeHeader{
 			length:         0x29,
 			fragmentLength: 0x29,
-			handshakeType:  handshakeTypeClientHello,
+			handshakeType:  handshakePkg.TypeClientHello,
 		},
 		handshakeMessage: &handshakeMessageClientHello{
 			version: protocolVersion{0xFE, 0xFD},

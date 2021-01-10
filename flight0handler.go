@@ -3,11 +3,13 @@ package dtls
 import (
 	"context"
 	"crypto/rand"
+
+	handshakePkg "github.com/pion/dtls/v2/pkg/protocol/handshake"
 )
 
 func flight0Parse(ctx context.Context, c flightConn, state *State, cache *handshakeCache, cfg *handshakeConfig) (flightVal, *alert, error) {
 	seq, msgs, ok := cache.fullPullMap(0,
-		handshakeCachePullRule{handshakeTypeClientHello, cfg.initialEpoch, true, false},
+		handshakeCachePullRule{handshakePkg.TypeClientHello, cfg.initialEpoch, true, false},
 	)
 	if !ok {
 		// No valid message received. Keep reading
@@ -18,7 +20,7 @@ func flight0Parse(ctx context.Context, c flightConn, state *State, cache *handsh
 	var clientHello *handshakeMessageClientHello
 
 	// Validate type
-	if clientHello, ok = msgs[handshakeTypeClientHello].(*handshakeMessageClientHello); !ok {
+	if clientHello, ok = msgs[handshakePkg.TypeClientHello].(*handshakeMessageClientHello); !ok {
 		return 0, &alert{alertLevelFatal, alertInternalError}, nil
 	}
 

@@ -1,4 +1,4 @@
-package dtls
+package handshake
 
 import (
 	"crypto/x509"
@@ -57,11 +57,11 @@ func TestHandshakeMessageCertificate(t *testing.T) {
 		Version:                 1,
 	}
 
-	c := &handshakeMessageCertificate{}
+	c := &MessageCertificate{}
 	if err := c.Unmarshal(rawCertificate); err != nil {
 		t.Error(err)
 	} else {
-		certificate, err := x509.ParseCertificate(c.certificate[0])
+		certificate, err := x509.ParseCertificate(c.Certificate[0])
 		if err != nil {
 			t.Error(err)
 		}
@@ -84,11 +84,11 @@ func TestEmptyHandshakeMessageCertificate(t *testing.T) {
 		0x00, 0x00, 0x00,
 	}
 
-	expectedCertificate := &handshakeMessageCertificate{
-		certificate: nil,
+	expectedCertificate := &MessageCertificate{
+		Certificate: nil,
 	}
 
-	c := &handshakeMessageCertificate{}
+	c := &MessageCertificate{}
 	if err := c.Unmarshal(rawCertificate); err != nil {
 		t.Error(err)
 	}

@@ -6,6 +6,8 @@ import ( //nolint:gci
 	"crypto/hmac"
 	"crypto/rand"
 	"encoding/binary"
+
+	"github.com/pion/dtls/v2/internal/util"
 )
 
 // block ciphers using cipher block chaining.
@@ -97,7 +99,7 @@ func (c *cryptoCBC) decrypt(in []byte) ([]byte, error) {
 	case h.contentType == contentTypeChangeCipherSpec:
 		// Nothing to encrypt with ChangeCipherSpec
 		return in, nil
-	case len(body)%blockSize != 0 || len(body) < blockSize+max(mac.Size()+1, blockSize):
+	case len(body)%blockSize != 0 || len(body) < blockSize+util.Max(mac.Size()+1, blockSize):
 		return nil, errNotEnoughRoomForNonce
 	}
 

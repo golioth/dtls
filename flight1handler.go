@@ -2,27 +2,29 @@ package dtls
 
 import (
 	"context"
+
+	handshakePkg "github.com/pion/dtls/v2/pkg/protocol/handshake"
 )
 
 func flight1Parse(ctx context.Context, c flightConn, state *State, cache *handshakeCache, cfg *handshakeConfig) (flightVal, *alert, error) {
 	// HelloVerifyRequest can be skipped by the server,
 	// so allow ServerHello during flight1 also
 	seq, msgs, ok := cache.fullPullMap(state.handshakeRecvSequence,
-		handshakeCachePullRule{handshakeTypeHelloVerifyRequest, cfg.initialEpoch, false, true},
-		handshakeCachePullRule{handshakeTypeServerHello, cfg.initialEpoch, false, true},
+		handshakeCachePullRule{handshakePkg.TypeHelloVerifyRequest, cfg.initialEpoch, false, true},
+		handshakeCachePullRule{handshakePkg.TypeServerHello, cfg.initialEpoch, false, true},
 	)
 	if !ok {
 		// No valid message received. Keep reading
 		return 0, nil, nil
 	}
 
-	if _, ok := msgs[handshakeTypeServerHello]; ok {
+	if _, ok := msgs[handshakePkg.TypeServerHello]; ok {
 		// Flight1 and flight2 were skipped.
 		// Parse as flight3.
 		return flight3Parse(ctx, c, state, cache, cfg)
 	}
 
-	if h, ok := msgs[handshakeTypeHelloVerifyRequest].(*handshakeMessageHelloVerifyRequest); ok {
+	if h, ok := msgs[handshakePkg.TypeHelloVerifyRequest].(*handshakeMessageHelloVerifyRequest); ok {
 		// DTLS 1.2 clients must not assume that the server will use the protocol version
 		// specified in HelloVerifyRequest message. RFC 6347 Section 4.2.1
 		if !h.version.Equal(protocolVersion1_0) && !h.version.Equal(protocolVersion1_2) {

@@ -8,6 +8,7 @@ import ( //nolint:gci
 	"hash"
 	"math"
 
+	"github.com/pion/dtls/v2/internal/util"
 	"golang.org/x/crypto/curve25519"
 )
 
@@ -213,7 +214,7 @@ func prfMac(epoch uint16, sequenceNumber uint64, contentType contentType, protoc
 	msg := make([]byte, 13)
 
 	binary.BigEndian.PutUint16(msg, epoch)
-	putBigEndianUint48(msg[2:], sequenceNumber)
+	util.PutBigEndianUint48(msg[2:], sequenceNumber)
 	msg[8] = byte(contentType)
 	msg[9] = protocolVersion.major
 	msg[10] = protocolVersion.minor
