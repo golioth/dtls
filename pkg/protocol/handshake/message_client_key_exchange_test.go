@@ -1,4 +1,4 @@
-package dtls
+package handshake
 
 import (
 	"reflect"
@@ -11,11 +11,11 @@ func TestHandshakeMessageClientKeyExchange(t *testing.T) {
 		0x02, 0x05, 0xda, 0xf7, 0xd0, 0x3f, 0xe3, 0xf7, 0x4e, 0x8a, 0x14, 0x6f, 0xb7, 0xe0, 0xc0, 0xff,
 		0x54,
 	}
-	parsedClientKeyExchange := &handshakeMessageClientKeyExchange{
-		publicKey: rawClientKeyExchange[1:],
+	parsedClientKeyExchange := &MessageClientKeyExchange{
+		PublicKey: rawClientKeyExchange[1:],
 	}
 
-	c := &handshakeMessageClientKeyExchange{}
+	c := &MessageClientKeyExchange{}
 	if err := c.Unmarshal(rawClientKeyExchange); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(c, parsedClientKeyExchange) {

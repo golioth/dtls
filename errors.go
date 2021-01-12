@@ -40,7 +40,6 @@ var (
 	errInvalidCertificate                = &FatalError{errors.New("no certificate provided")}                                                                  //nolint:goerr113
 	errInvalidCipherSpec                 = &FatalError{errors.New("cipher spec invalid")}                                                                      //nolint:goerr113
 	errInvalidCipherSuite                = &FatalError{errors.New("invalid or unknown cipher suite")}                                                          //nolint:goerr113
-	errInvalidClientKeyExchange          = &FatalError{errors.New("unable to determine if ClientKeyExchange is a public key or PSK Identity")}                 //nolint:goerr113
 	errInvalidCompressionMethod          = &FatalError{errors.New("invalid or unknown compression method")}                                                    //nolint:goerr113
 	errInvalidECDSASignature             = &FatalError{errors.New("ECDSA signature contained zero or negative values")}                                        //nolint:goerr113
 	errInvalidEllipticCurveType          = &FatalError{errors.New("invalid or unknown elliptic curve type")}                                                   //nolint:goerr113

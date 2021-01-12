@@ -76,11 +76,11 @@ func flight5Generate(c flightConn, state *State, cache *handshakeCache, cfg *han
 			})
 	}
 
-	clientKeyExchange := &handshakeMessageClientKeyExchange{}
+	clientKeyExchange := &handshakePkg.MessageClientKeyExchange{}
 	if cfg.localPSKCallback == nil {
-		clientKeyExchange.publicKey = state.localKeypair.publicKey
+		clientKeyExchange.PublicKey = state.localKeypair.publicKey
 	} else {
-		clientKeyExchange.identityHint = cfg.localPSKIdentityHint
+		clientKeyExchange.IdentityHint = cfg.localPSKIdentityHint
 	}
 
 	pkts = append(pkts,

@@ -19,8 +19,8 @@ func flight4Parse(ctx context.Context, c flightConn, state *State, cache *handsh
 	}
 
 	// Validate type
-	var clientKeyExchange *handshakeMessageClientKeyExchange
-	if clientKeyExchange, ok = msgs[handshakePkg.TypeClientKeyExchange].(*handshakeMessageClientKeyExchange); !ok {
+	var clientKeyExchange *handshakePkg.MessageClientKeyExchange
+	if clientKeyExchange, ok = msgs[handshakePkg.TypeClientKeyExchange].(*handshakePkg.MessageClientKeyExchange); !ok {
 		return 0, &alert{alertLevelFatal, alertInternalError}, nil
 	}
 
@@ -84,13 +84,13 @@ func flight4Parse(ctx context.Context, c flightConn, state *State, cache *handsh
 		var preMasterSecret []byte
 		if state.cipherSuite.isPSK() {
 			var psk []byte
-			if psk, err = cfg.localPSKCallback(clientKeyExchange.identityHint); err != nil {
+			if psk, err = cfg.localPSKCallback(clientKeyExchange.IdentityHint); err != nil {
 				return 0, &alert{alertLevelFatal, alertInternalError}, err
 			}
 
 			preMasterSecret = prfPSKPreMasterSecret(psk)
 		} else {
-			preMasterSecret, err = prfPreMasterSecret(clientKeyExchange.publicKey, state.localKeypair.privateKey, state.localKeypair.curve)
+			preMasterSecret, err = prfPreMasterSecret(clientKeyExchange.PublicKey, state.localKeypair.privateKey, state.localKeypair.curve)
 			if err != nil {
 				return 0, &alert{alertLevelFatal, alertIllegalParameter}, err
 			}
