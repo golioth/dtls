@@ -130,7 +130,7 @@ func flight5Generate(c flightConn, state *State, cache *handshakeCache, cfg *han
 		if !ok {
 			return nil, &alert{alertLevelFatal, alertInternalError}, errInvalidContentType
 		}
-		h.handshakeHeader.messageSequence = seqPred
+		h.header.MessageSequence = seqPred
 		seqPred++
 		raw, err := h.Marshal()
 		if err != nil {
@@ -190,7 +190,7 @@ func flight5Generate(c flightConn, state *State, cache *handshakeCache, cfg *han
 		if !ok {
 			return nil, &alert{alertLevelFatal, alertInternalError}, errInvalidContentType
 		}
-		h.handshakeHeader.messageSequence = seqPred
+		h.header.MessageSequence = seqPred
 		// seqPred++ // this is the last use of seqPred
 		raw, err := h.Marshal()
 		if err != nil {

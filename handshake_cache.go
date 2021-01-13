@@ -111,7 +111,7 @@ func (h *handshakeCache) fullPullMap(startSeq int, rules ...handshakeCachePullRu
 		if err := rawHandshake.Unmarshal(i.data); err != nil {
 			return startSeq, nil, false
 		}
-		if uint16(seq) != rawHandshake.handshakeHeader.messageSequence {
+		if uint16(seq) != rawHandshake.header.MessageSequence {
 			// There is a gap. Some messages are not arrived.
 			return startSeq, nil, false
 		}

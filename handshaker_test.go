@@ -217,20 +217,20 @@ func (c *flightTestConn) writePackets(ctx context.Context, pkts []*packet) error
 				return err
 			}
 
-			c.handshakeCache.push(handshakeRaw[recordLayerHeaderSize:], p.record.recordLayerHeader.epoch, h.handshakeHeader.messageSequence, h.handshakeHeader.handshakeType, c.state.isClient)
+			c.handshakeCache.push(handshakeRaw[recordLayerHeaderSize:], p.record.recordLayerHeader.epoch, h.header.MessageSequence, h.header.Type, c.state.isClient)
 
 			content, err := h.handshakeMessage.Marshal()
 			if err != nil {
 				return err
 			}
-			h.handshakeHeader.length = uint32(len(content))
-			h.handshakeHeader.fragmentLength = uint32(len(content))
-			hdr, err := h.handshakeHeader.Marshal()
+			h.header.Length = uint32(len(content))
+			h.header.FragmentLength = uint32(len(content))
+			hdr, err := h.header.Marshal()
 			if err != nil {
 				return err
 			}
 			c.otherEndCache.push(
-				append(hdr, content...), p.record.recordLayerHeader.epoch, h.handshakeHeader.messageSequence, h.handshakeHeader.handshakeType, c.state.isClient)
+				append(hdr, content...), p.record.recordLayerHeader.epoch, h.header.MessageSequence, h.header.Type, c.state.isClient)
 		}
 	}
 	go func() {

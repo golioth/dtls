@@ -5,12 +5,6 @@ import (
 	handshakePkg "github.com/pion/dtls/v2/pkg/protocol/handshake"
 )
 
-const (
-	// msg_len for Handshake messages assumes an extra 12 bytes for
-	// sequence, fragment and version information
-	handshakeMessageHeaderLength = 12
-)
-
 type handshakeMessage interface {
 	Marshal() ([]byte, error)
 	Unmarshal(data []byte) error
@@ -25,7 +19,7 @@ type handshakeMessage interface {
 // certificates signed by a trusted certificate authority.
 // https://tools.ietf.org/html/rfc5246#section-7.3
 type handshake struct {
-	handshakeHeader  handshakeHeader
+	header           handshakePkg.Header
 	handshakeMessage handshakeMessage
 }
 
@@ -36,7 +30,7 @@ func (h handshake) contentType() contentType {
 func (h *handshake) Marshal() ([]byte, error) {
 	if h.handshakeMessage == nil {
 		return nil, errHandshakeMessageUnset
-	} else if h.handshakeHeader.fragmentOffset != 0 {
+	} else if h.header.FragmentOffset != 0 {
 		return nil, errUnableToMarshalFragmented
 	}
 
@@ -45,10 +39,10 @@ func (h *handshake) Marshal() ([]byte, error) {
 		return nil, err
 	}
 
-	h.handshakeHeader.length = uint32(len(msg))
-	h.handshakeHeader.fragmentLength = h.handshakeHeader.length
-	h.handshakeHeader.handshakeType = h.handshakeMessage.Type()
-	header, err := h.handshakeHeader.Marshal()
+	h.header.Length = uint32(len(msg))
+	h.header.FragmentLength = h.header.Length
+	h.header.Type = h.handshakeMessage.Type()
+	header, err := h.header.Marshal()
 	if err != nil {
 		return nil, err
 	}
@@ -57,14 +51,14 @@ func (h *handshake) Marshal() ([]byte, error) {
 }
 
 func (h *handshake) Unmarshal(data []byte) error {
-	if err := h.handshakeHeader.Unmarshal(data); err != nil {
+	if err := h.header.Unmarshal(data); err != nil {
 		return err
 	}
 
 	reportedLen := util.BigEndianUint24(data[1:])
-	if uint32(len(data)-handshakeMessageHeaderLength) != reportedLen {
+	if uint32(len(data)-handshakePkg.HeaderLength) != reportedLen {
 		return errLengthMismatch
-	} else if reportedLen != h.handshakeHeader.fragmentLength {
+	} else if reportedLen != h.header.FragmentLength {
 		return errLengthMismatch
 	}
 
@@ -94,5 +88,5 @@ func (h *handshake) Unmarshal(data []byte) error {
 	default:
 		return errNotImplemented
 	}
-	return h.handshakeMessage.Unmarshal(data[handshakeMessageHeaderLength:])
+	return h.handshakeMessage.Unmarshal(data[handshakePkg.HeaderLength:])
 }

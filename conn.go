@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/pion/dtls/v2/internal/closer"
+	handshakePkg "github.com/pion/dtls/v2/pkg/protocol/handshake"
 	"github.com/pion/logging"
 	"github.com/pion/transport/connctx"
 	"github.com/pion/transport/deadline"
@@ -377,9 +378,9 @@ func (c *Conn) writePackets(ctx context.Context, pkts []*packet) error {
 			}
 
 			c.log.Tracef("[handshake:%v] -> %s (epoch: %d, seq: %d)",
-				srvCliStr(c.state.isClient), h.handshakeHeader.handshakeType.String(),
-				p.record.recordLayerHeader.epoch, h.handshakeHeader.messageSequence)
-			c.handshakeCache.push(handshakeRaw[recordLayerHeaderSize:], p.record.recordLayerHeader.epoch, h.handshakeHeader.messageSequence, h.handshakeHeader.handshakeType, c.state.isClient)
+				srvCliStr(c.state.isClient), h.header.Type.String(),
+				p.record.recordLayerHeader.epoch, h.header.MessageSequence)
+			c.handshakeCache.push(handshakeRaw[recordLayerHeaderSize:], p.record.recordLayerHeader.epoch, h.header.MessageSequence, h.header.Type, c.state.isClient)
 
 			rawHandshakePackets, err := c.processHandshakePacket(p, h)
 			if err != nil {
@@ -522,22 +523,22 @@ func (c *Conn) fragmentHandshake(h *handshake) ([][]byte, error) {
 	for _, contentFragment := range contentFragments {
 		contentFragmentLen := len(contentFragment)
 
-		handshakeHeaderFragment := &handshakeHeader{
-			handshakeType:   h.handshakeHeader.handshakeType,
-			length:          h.handshakeHeader.length,
-			messageSequence: h.handshakeHeader.messageSequence,
-			fragmentOffset:  uint32(offset),
-			fragmentLength:  uint32(contentFragmentLen),
+		headerFragment := &handshakePkg.Header{
+			Type:            h.header.Type,
+			Length:          h.header.Length,
+			MessageSequence: h.header.MessageSequence,
+			FragmentOffset:  uint32(offset),
+			FragmentLength:  uint32(contentFragmentLen),
 		}
 
 		offset += contentFragmentLen
 
-		handshakeHeaderFragmentRaw, err := handshakeHeaderFragment.Marshal()
+		headerFragmentRaw, err := headerFragment.Marshal()
 		if err != nil {
 			return nil, err
 		}
 
-		fragmentedHandshake := append(handshakeHeaderFragmentRaw, contentFragment...)
+		fragmentedHandshake := append(headerFragmentRaw, contentFragment...)
 		fragmentedHandshakes = append(fragmentedHandshakes, fragmentedHandshake)
 	}
 
@@ -700,7 +701,7 @@ func (c *Conn) handleIncomingPacket(buf []byte, enqueue bool) (bool, *alert, err
 				continue
 			}
 
-			_ = c.handshakeCache.push(out, epoch, rawHandshake.handshakeHeader.messageSequence, rawHandshake.handshakeHeader.handshakeType, !c.state.isClient)
+			_ = c.handshakeCache.push(out, epoch, rawHandshake.header.MessageSequence, rawHandshake.header.Type, !c.state.isClient)
 		}
 
 		return true, nil, nil

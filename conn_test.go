@@ -1444,8 +1444,8 @@ func TestServerTimeout(t *testing.T) {
 		},
 		content: &handshake{
 			// sequenceNumber and messageSequence line up, may need to be re-evaluated
-			handshakeHeader: handshakeHeader{
-				messageSequence: 0,
+			header: handshakePkg.Header{
+				MessageSequence: 0,
 			},
 			handshakeMessage: &handshakeMessageClientHello{
 				version:            protocolVersion1_2,
@@ -1594,8 +1594,8 @@ func TestProtocolVersionValidation(t *testing.T) {
 							sequenceNumber:  1,
 						},
 						content: &handshake{
-							handshakeHeader: handshakeHeader{
-								messageSequence: 1,
+							header: handshakePkg.Header{
+								MessageSequence: 1,
 							},
 							handshakeMessage: &handshakeMessageClientHello{
 								version:            protocolVersion{0xfe, 0xff}, // try to downgrade
@@ -1685,8 +1685,8 @@ func TestProtocolVersionValidation(t *testing.T) {
 							sequenceNumber:  1,
 						},
 						content: &handshake{
-							handshakeHeader: handshakeHeader{
-								messageSequence: 1,
+							header: handshakePkg.Header{
+								MessageSequence: 1,
 							},
 							handshakeMessage: &handshakeMessageServerHello{
 								version:           protocolVersion{0xfe, 0xff}, // try to downgrade
@@ -1702,8 +1702,8 @@ func TestProtocolVersionValidation(t *testing.T) {
 							sequenceNumber:  2,
 						},
 						content: &handshake{
-							handshakeHeader: handshakeHeader{
-								messageSequence: 2,
+							header: handshakePkg.Header{
+								MessageSequence: 2,
 							},
 							handshakeMessage: &handshakePkg.MessageCertificate{},
 						},
@@ -1714,8 +1714,8 @@ func TestProtocolVersionValidation(t *testing.T) {
 							sequenceNumber:  3,
 						},
 						content: &handshake{
-							handshakeHeader: handshakeHeader{
-								messageSequence: 3,
+							header: handshakePkg.Header{
+								MessageSequence: 3,
 							},
 							handshakeMessage: &handshakeMessageServerKeyExchange{
 								ellipticCurveType:  ellipticCurveTypeNamedCurve,
@@ -1733,8 +1733,8 @@ func TestProtocolVersionValidation(t *testing.T) {
 							sequenceNumber:  4,
 						},
 						content: &handshake{
-							handshakeHeader: handshakeHeader{
-								messageSequence: 4,
+							header: handshakePkg.Header{
+								MessageSequence: 4,
 							},
 							handshakeMessage: &handshakeMessageServerHelloDone{},
 						},
@@ -1827,8 +1827,8 @@ func TestMultipleHelloVerifyRequest(t *testing.T) {
 				protocolVersion: protocolVersion1_2,
 			},
 			content: &handshake{
-				handshakeHeader: handshakeHeader{
-					messageSequence: uint16(i),
+				header: handshakePkg.Header{
+					MessageSequence: uint16(i),
 				},
 				handshakeMessage: &handshakeMessageHelloVerifyRequest{
 					version: protocolVersion1_2,
