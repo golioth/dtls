@@ -15,7 +15,7 @@ func flight6Parse(ctx context.Context, c flightConn, state *State, cache *handsh
 		return 0, nil, nil
 	}
 
-	if _, ok = msgs[handshakePkg.TypeFinished].(*handshakeMessageFinished); !ok {
+	if _, ok = msgs[handshakePkg.TypeFinished].(*handshakePkg.MessageFinished); !ok {
 		return 0, &alert{alertLevelFatal, alertInternalError}, nil
 	}
 
@@ -65,8 +65,8 @@ func flight6Generate(c flightConn, state *State, cache *handshakeCache, cfg *han
 					epoch:           1,
 				},
 				content: &handshake{
-					handshakeMessage: &handshakeMessageFinished{
-						verifyData: state.localVerifyData,
+					handshakeMessage: &handshakePkg.MessageFinished{
+						VerifyData: state.localVerifyData,
 					},
 				},
 			},

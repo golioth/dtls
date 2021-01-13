@@ -18,8 +18,8 @@ func flight5Parse(ctx context.Context, c flightConn, state *State, cache *handsh
 		return 0, nil, nil
 	}
 
-	var finished *handshakeMessageFinished
-	if finished, ok = msgs[handshakePkg.TypeFinished].(*handshakeMessageFinished); !ok {
+	var finished *handshakePkg.MessageFinished
+	if finished, ok = msgs[handshakePkg.TypeFinished].(*handshakePkg.MessageFinished); !ok {
 		return 0, &alert{alertLevelFatal, alertInternalError}, nil
 	}
 	plainText := cache.pullAndMerge(
@@ -39,7 +39,7 @@ func flight5Parse(ctx context.Context, c flightConn, state *State, cache *handsh
 	if err != nil {
 		return 0, &alert{alertLevelFatal, alertInternalError}, err
 	}
-	if !bytes.Equal(expectedVerifyData, finished.verifyData) {
+	if !bytes.Equal(expectedVerifyData, finished.VerifyData) {
 		return 0, &alert{alertLevelFatal, alertHandshakeFailure}, errVerifyDataMismatch
 	}
 
@@ -238,8 +238,8 @@ func flight5Generate(c flightConn, state *State, cache *handshakeCache, cfg *han
 					epoch:           1,
 				},
 				content: &handshake{
-					handshakeMessage: &handshakeMessageFinished{
-						verifyData: state.localVerifyData,
+					handshakeMessage: &handshakePkg.MessageFinished{
+						VerifyData: state.localVerifyData,
 					},
 				},
 			},

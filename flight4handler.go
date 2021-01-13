@@ -133,7 +133,7 @@ func flight4Parse(ctx context.Context, c flightConn, state *State, cache *handsh
 	}
 	state.handshakeRecvSequence = seq
 
-	if _, ok = msgs[handshakePkg.TypeFinished].(*handshakeMessageFinished); !ok {
+	if _, ok = msgs[handshakePkg.TypeFinished].(*handshakePkg.MessageFinished); !ok {
 		return 0, &alert{alertLevelFatal, alertInternalError}, nil
 	}
 

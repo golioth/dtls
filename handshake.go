@@ -88,7 +88,7 @@ func (h *handshake) Unmarshal(data []byte) error {
 	case handshakePkg.TypeClientKeyExchange:
 		h.handshakeMessage = &handshakePkg.MessageClientKeyExchange{}
 	case handshakePkg.TypeFinished:
-		h.handshakeMessage = &handshakeMessageFinished{}
+		h.handshakeMessage = &handshakePkg.MessageFinished{}
 	case handshakePkg.TypeCertificateVerify:
 		h.handshakeMessage = &handshakeMessageCertificateVerify{}
 	default:
